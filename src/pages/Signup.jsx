@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled } from "styled-components";
 import BackgroundImage from "../components/BackgroundImage";
 import Header from "../components/Header";
-import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { auth } from "../utils/firebaseConfig";
 import { Navigate, navigate, useNavigate } from "react-router-dom";
 
@@ -12,17 +15,28 @@ const Signup = () => {
   const handleFormChange = (event) => {
     setformValue({ ...formValues, [event.target.name]: event.target.value });
   };
-  const nav = useNavigate()
+  useEffect(() => {
+    let unsuscribe;
+    try {
+      unsuscribe = onAuthStateChanged(auth, (currentUser) => {
+        console.log(currentUser);
+        if (currentUser) {
+          nav("/");
+        }
+      });
+
+      return unsuscribe;
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  const nav = useNavigate();
   const handleSignUp = async () => {
     try {
       const { email, password } = formValues;
       await createUserWithEmailAndPassword(auth, email, password);
-      onAuthStateChanged(auth, (currentUser)=>{
-        if(currentUser){
-            nav("/")
-        }
-      })
-      setformValue({ email: "", password: "" })
+      setformValue({ email: "", password: "" });
     } catch (error) {
       console.log(error);
     }

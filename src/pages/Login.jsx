@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled } from "styled-components";
 import BackgroundImage from "../components/BackgroundImage";
 import Header from "../components/Header";
@@ -9,6 +9,22 @@ import { Navigate, navigate, useNavigate } from "react-router-dom";
 const Login = () => {
   const [showPassword, setshowPassword] = useState(false);
   const [formValues, setformValue] = useState({ email: "", password: "" });
+    useEffect(() => {
+      let unsuscribe;
+      try {
+        unsuscribe = onAuthStateChanged(auth, (currentUser) => {
+          console.log(currentUser);
+          if (currentUser) {
+            nav("/");
+          }
+        });
+  
+        return unsuscribe;
+      } catch (error) {
+        console.error(error);
+      }
+    }, []);
+
   const handleFormChange = (event) => {
     setformValue({ ...formValues, [event.target.name]: event.target.value });
   };
@@ -17,17 +33,12 @@ const Login = () => {
     try {
       const { email, password } = formValues;
       await signInWithEmailAndPassword(auth, email, password);
-      onAuthStateChanged(auth, (currentUser) => {
-        console.log(currentUser);
-        if (currentUser) {
-          nav("/");
-        }
-      });
       setformValue({ email: "", password: "" });
     } catch (error) {
       console.error(error);
     }
   };
+  
   return (
     <Container>
       <BackgroundImage />
